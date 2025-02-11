@@ -19,6 +19,7 @@ jobs:
     container: ghcr.io/foundeo/cfml-ci-tools/cfml-ci-tools:1.0.6
     env:
       REPORT_GITHUB_PAT: ${{ secrets.REPORT_GITHUB_PAT }}
+      BOX_CONFIG_colorInDumbTerminal: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
