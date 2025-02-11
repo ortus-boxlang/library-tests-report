@@ -1,0 +1,29 @@
+name: Build Lucee Release
+
+on:
+  # Enable manual workflow runs
+  workflow_dispatch:
+  # Enable triggering a build via the github API
+  # Or trigger a build from another repo via https://github.com/marketplace/actions/repository-dispatch
+  repository_dispatch:
+    types: [ build_report ]
+  schedule:
+    # Run every day at midnight.
+    # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron:  0 0 * * *
+
+jobs:
+  build:
+    name: Build Report
+    runs-on: ubuntu-latest
+    container: ghcr.io/foundeo/cfml-ci-tools/cfml-ci-tools:1.0.6
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Run Report Task
+        run: box task run
