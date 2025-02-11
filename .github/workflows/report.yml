@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/foundeo/cfml-ci-tools/cfml-ci-tools:1.0.6
     env:
-      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      GITHUB_PAT: ${{ secrets.REPORT_GITHUB_PAT }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
