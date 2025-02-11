@@ -7,7 +7,7 @@ component {
 	*
 	*/
 	function run() {
-		variables.PAT = getSystemSetting( 'github_pat' );
+		variables.PAT = getSystemSetting( 'report_github_pat' );
 
 		repos = getRepos( 'coldbox-modules' )
 			.append( getRepos( 'ColdBox' ), true )
