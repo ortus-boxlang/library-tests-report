@@ -1,4 +1,4 @@
-name: Build Lucee Release
+name: Build BoxLang Test Report
 
 on:
   # Enable manual workflow runs
