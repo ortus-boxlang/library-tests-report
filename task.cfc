@@ -8,8 +8,12 @@ component {
 	*/
 	function run() {
 		variables.PAT = getSystemSetting( 'REPORT_GITHUB_PAT' );
+		variables.coldbox_token=getSystemSetting( 'COLDBOX_TOKEN' );
+		variables.ortus_token=getSystemSetting( 'ORTUS_TOKEN' );
+		variables.coldbox_modules_token=getSystemSetting( 'COLDBOX_MODULES_TOKEN' );
+		variables.ortus_boxlang_token=getSystemSetting( 'ORTUS_BOXLANG_TOKEN' );
 
-		repos = getRepos( 'coldbox-modules' )
+		var repos = getRepos( 'coldbox-modules' )
 			.append( getRepos( 'ColdBox' ), true )
 			.append( getRepos( 'Ortus-Solutions' ), true );
 
@@ -29,6 +33,66 @@ component {
 				}
 			}
 		}, true);
+
+		print.line().line( "Checking for inactive workflows" ).toConsole();
+		repos.each( (repo) => {
+			getInactiveWorkflows( repo ).each( (workflow) => {
+				
+				var theURL = 'https://api.github.com/repos/#repo#/actions/workflows/#workflow.id#/enable';
+				http url=theURL result="local.result" method="PUT" {
+					httpparam type="header" name="Authorization" value="Bearer #getPATForRepo( repo.listFirst('/') )#";
+				}
+				print.Boldline( "Re-activated #repo# #workflow.name#" ).toConsole();
+			});
+		}, true);
+
+		print.line().line( "Updating last run in repo" ).toConsole();
+		updateLastRun();
+
+	}
+
+	function updateLastRun() {
+			
+			var payload = {
+				"message": "Update last run",
+				"content": toBase64(now().toString()),
+				"branch": "development"
+			};
+			
+			var theURL = 'https://api.github.com/repos/ortus-boxlang/library-tests-report/contents/lastRun.txt';
+			
+			http url=theURL method="PUT" result="local.result" {
+				httpparam type="header" name="Authorization" value="Bearer #ortus_boxlang_token#";
+				httpparam type="header" name="Accept" value="application/vnd.github+json";
+				httpparam type="body" value="#serializeJSON(payload)#";
+			}
+	}
+
+	function getPATForRepo( orgName ) {
+		switch( orgName ) {
+			case 'ColdBox' : return variables.coldbox_token;
+			case 'Ortus-Solutions' : return variables.ortus_token;
+			case 'coldbox-modules' : return variables.coldbox_modules_token;
+			default : return variables.PAT;
+		}
+	}
+
+	function getInactiveWorkflows( repo ) {
+		var theURL = 'https://api.github.com/repos/#repo#/actions/workflows';
+		http url=theURL result="local.result" {
+			httpparam type="header" name="Authorization" value="Bearer #PAT#";
+		}
+
+		return deserializeJSON(local.result.fileContent)
+			.workflows
+			.filter( (workflow) => workflow.state == 'disabled_inactivity' )
+			.map( (workflow) => {
+				return {
+					'id' : workflow.id,
+					'name' : workflow.name,
+					'path' : workflow.path
+				};
+			} );		
 	}
 
 	function getLastRunID(repo) {
