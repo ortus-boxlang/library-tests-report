@@ -17,7 +17,7 @@ component {
 			.append( getRepos( 'ColdBox' ), true )
 			.append( getRepos( 'Ortus-Solutions' ), true );
 
-	/* 	repos.each( (repo) => {
+		repos.each( (repo) => {
 			var lastRunID = getLastRunID(repo);
 			if( lastRunID ) {
 				var BLJobs = getJobs(repo, lastRunID);
@@ -44,7 +44,7 @@ component {
 				}
 				print.Boldline( "Re-activated #repo# #workflow.name#" ).toConsole();
 			});
-		}, true); */
+		}, true);
 
 		print.line().line( "Updating last run in repo" ).toConsole();
 		updateLastRun();
