@@ -40,7 +40,7 @@ component {
 		var i = 1;
 		while( i <= runs.len() ) {
 			// Skip any running workflows
-			if( runs[i].status == 'completed' && runs[i].event != 'pull_request' && !(runs[i].name contains 'Pull Request') ) {
+			if( runs[i].status == 'completed' && runs[i].event != 'pull_request' && !(runs[i].name contains 'Pull Request') && !(runs[i].name contains 'Release') ) {
 				return runs[i].id;
 			}
 			i++;
