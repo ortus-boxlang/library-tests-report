@@ -17,7 +17,7 @@ component {
 			.append( getRepos( 'ColdBox' ), true )
 			.append( getRepos( 'Ortus-Solutions' ), true );
 
-		repos.each( (repo) => {
+	/* 	repos.each( (repo) => {
 			var lastRunID = getLastRunID(repo);
 			if( lastRunID ) {
 				var BLJobs = getJobs(repo, lastRunID);
@@ -44,7 +44,7 @@ component {
 				}
 				print.Boldline( "Re-activated #repo# #workflow.name#" ).toConsole();
 			});
-		}, true);
+		}, true); */
 
 		print.line().line( "Updating last run in repo" ).toConsole();
 		updateLastRun();
@@ -52,21 +52,33 @@ component {
 	}
 
 	function updateLastRun() {
-			
-			var payload = {
-				"message": "Update last run",
-				"content": toBase64(now().toString()),
-				"branch": "development"
-			};
-			
-			var theURL = 'https://api.github.com/repos/ortus-boxlang/library-tests-report/contents/lastRun.txt';
-			
-			http url=theURL method="PUT" result="local.result" {
-				httpparam type="header" name="Authorization" value="Bearer #ortus_boxlang_token#";
-				httpparam type="header" name="Accept" value="application/vnd.github+json";
-				httpparam type="body" value="#serializeJSON(payload)#";
-			}
-			print.line(result).toConsole();
+		
+		var theURL = 'https://api.github.com/repos/ortus-boxlang/library-tests-report/contents/lastRun.txt';
+		
+		// Get existing file SHA
+		http url=theURL method="GET" result="local.getResult" {
+			httpparam type="header" name="Authorization" value="Bearer #ortus_boxlang_token#";
+			httpparam type="header" name="Accept" value="application/vnd.github+json";
+		}
+		
+		var payload = {
+			"message": "Update last run",
+			"content": toBase64(now().toString()),
+			"branch": "development"
+		};
+		
+		// Add SHA if file exists
+		if (local.getResult.status_Code == "200") {
+			payload['sha'] = deserializeJSON(local.getResult.fileContent).sha;
+		} else {
+			print.line( getResult ).toConsole();
+		}
+		
+		http url=theURL method="PUT" result="local.result" {
+			httpparam type="header" name="Authorization" value="Bearer #ortus_boxlang_token#";
+			httpparam type="header" name="Accept" value="application/vnd.github+json";
+			httpparam type="body" value="#serializeJSON(payload)#";
+		}
 	}
 
 	function getPATForRepo( orgName ) {
