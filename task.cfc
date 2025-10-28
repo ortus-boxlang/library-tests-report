@@ -145,16 +145,32 @@ component {
 		return data;
 	}
 
-	function getRepos( orgName ) {
-		var theURL = 'https://api.github.com/orgs/#orgName#/repos';
+	function getRepos( orgName, page=1 ) {
+		var repos = [];
+		var theURL = 'https://api.github.com/orgs/#orgName#/repos?page=#page#&per_page=100';
 		http url=theURL result="local.result" {
 			httpparam type="header" name="Authorization" value="token #PAT#";
 		}
+		
 		//print.line( local.result.responseHeader['X-RateLimit-Remaining'] & ' API hits remaining this hour' ).line().line().toConsole();
-		return deserializeJSON(local.result.fileContent)
+		repos.append( deserializeJSON(local.result.fileContent)
 			.map(  (repo) => {
 				return repo.full_name;
-			});		
+			}), true );		
+
+		// check for pagination
+		if( structKeyExists( local.result.responseHeader, 'Link' ) ) {
+			var links = local.result.responseHeader['Link'].listToArray( ',' );
+			links.each( (link) => {
+				if( link contains 'rel="next"' ) {
+					var nextURL = rereplace( link, '<(.*)>; rel="next"', '\1' );
+					var nextPage = listLast( nextURL.listToArray( '?' )[2], '=' );
+					repos.append( getRepos( orgName, nextPage ), true );
+				}
+			});
+		}
+
+		return repos;
 	}
 
 }
