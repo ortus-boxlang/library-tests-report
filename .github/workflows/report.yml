@@ -16,17 +16,18 @@ jobs:
   build:
     name: Build Report
     runs-on: ubuntu-latest
-    container: ghcr.io/foundeo/cfml-ci-tools/cfml-ci-tools:1.0.6
+    container: ghcr.io/foundeo/cfml-ci-tools/cfml-ci-tools:1.1.1
     env:
       REPORT_GITHUB_PAT: ${{ secrets.REPORT_GITHUB_PAT }}
       COLDBOX_TOKEN: ${{ secrets.COLDBOX_TOKEN }}
       ORTUS_TOKEN: ${{ secrets.ORTUS_TOKEN }}
       COLDBOX_MODULES_TOKEN: ${{ secrets.COLDBOX_MODULES_TOKEN }}
       ORTUS_BOXLANG_TOKEN: ${{ secrets.ORTUS_BOXLANG_TOKEN }}      
-      BOX_CONFIG_colorInDumbTerminal: true    
+      BOX_CONFIG_colorInDumbTerminal: true
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
